@@ -5,5 +5,15 @@
     <string name="weather_forecast">Weather Forecast</string>
     <string name="pressure">Pressure</string>
     <string name="powered_by">Powered by Open Weather</string>
+    <string name="temparature_desc">Temp Value</string>
 
+    <string name="n">N ⇑</string>
+    <string name="ne">NE ⇗</string>
+    <string name="e">E ⇒</string>
+    <string name="se">SE ⇘</string>
+    <string name="s">S ⇓</string>
+    <string name="sw">SW ⇙</string>
+    <string name="w">W ⇐</string>
+    <string name="nw">NW ⇖</string>
+    <string name="weather_forecast_title">Weather Forecast</string>
 </resources>

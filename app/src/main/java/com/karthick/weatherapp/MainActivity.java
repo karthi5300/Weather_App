@@ -3,22 +3,20 @@ package com.karthick.weatherapp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.karthick.weatherapp.data.Weather;
+import com.google.android.material.button.MaterialButton;
 import com.karthick.weatherapp.data.WeatherData;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,16 +24,18 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    String CITY_NAME = "Tirupur";
+    String CITY_NAME = "Toronto";
     String APP_ID = "ebfcac32bda131ed5a160f2757938396";
     private static DecimalFormat df = new DecimalFormat("0");
     boolean isCelcius = true;
+    int hours;
 
     private ConstraintLayout mRootLayout;
     private TextView mCityName, mTempValue, mTempDescription, mWindSpeed, mWindDirection, mPressure, mHumidity, mDate;
     private ImageView mTempImage;
+    private MaterialButton mForecastButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +49,16 @@ public class MainActivity extends AppCompatActivity {
         mHumidity = findViewById(R.id.humidity_value);
         mTempImage = findViewById(R.id.temparature_image);
         mDate = findViewById(R.id.date);
-        mRootLayout = findViewById(R.id.root_layout);
+        mRootLayout = findViewById(R.id.main_root_layout);
         mWindDirection = findViewById(R.id.wind_direction_value);
         mPressure = findViewById(R.id.pressure_value);
+        mForecastButton = findViewById(R.id.forecast_button);
+
+        mForecastButton.setOnClickListener(this);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.openweathermap.org/")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())     //GSON CONVERTER
                 .build();
 
         OpenWeatherMapApi openWeatherMapApi = retrofit.create(OpenWeatherMapApi.class);
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         Call<WeatherData> call = openWeatherMapApi.getWeather(CITY_NAME, APP_ID);
 
         call.enqueue(new Callback<WeatherData>() {
-            private static final String TAG = "WeatherApp";
+            private static final String TAG = "tag";
 
             @Override
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
@@ -81,14 +84,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //SET DATE
-                Date expiry = new Date((weatherData.getDt()) * 1000);
+                Date date = new Date((weatherData.getDt()) * 1000);
                 DateFormat dateFormat = new SimpleDateFormat("E, MMM dd, yyyy");
-                mDate.setText(dateFormat.format(expiry));
-                Log.d(TAG, expiry.toString());
+                mDate.setText(dateFormat.format(date));
 
                 //SET BACKGROUND BASED ON TIME
-                DateFormat hourFormat = new SimpleDateFormat("hh");
-                int hour = Integer.parseInt(hourFormat.format(expiry));
+                DateFormat hourFormat = new SimpleDateFormat("HH");
+                int hour = Integer.parseInt(hourFormat.format(date));
+                Log.d(TAG, "Main: " + hour);
 
                 if (hour >= 7 && hour <= 10) {
                     mRootLayout.setBackgroundResource(R.drawable.morning);
@@ -96,18 +99,18 @@ public class MainActivity extends AppCompatActivity {
                     mRootLayout.setBackgroundResource(R.drawable.noon);
                 } else if (hour >= 17 && hour <= 18) {
                     mRootLayout.setBackgroundResource(R.drawable.evening);
-                } else if (hour >= 19 && hour < 22) {
+                } else if (hour >= 19 && hour <= 22) {
                     mRootLayout.setBackgroundResource(R.drawable.night);
-                } else if ((hour >= 23 || (hour >= 0 && hour <= 6))) {
+                } else if ((hour == 23 || (hour >= 0 && hour <= 6))) {
                     mRootLayout.setBackgroundResource(R.drawable.midnight);
                 }
+                hours = hour;
 
                 //SET TEMPERATURE
-
                 double tempC = convertToCelcius(weatherData.getMain().getTemp());    //CONVERTING KELVIN TO CELCIUS
                 double tempF = convertToFahrenheit(weatherData.getMain().getTemp());    //CONVERTING KELVIN TO FAHRENHEIT
                 String tempCValue = (df.format(tempC)) + "°C";  //ROUNDING OFF TO 1 DECIMAL PLACE
-                String tempFValue = (df.format(tempF)) + "°F";    //ROUNDING OFF TO 1 DECIMAL PLACE
+                String tempFValue = (df.format(tempF)) + "F";    //ROUNDING OFF TO 1 DECIMAL PLACE
                 mTempValue.setText(tempCValue);
 
                 //TO TOGGLE DISPLAY IN FAHRENHEIT
@@ -124,36 +127,38 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                //GET TEMPERATURE DESCRIPTION
+                //GET WEATHER DESCRIPTION
                 String description = weatherData.getWeather()[0].getDescription();
-
-                if (description.equalsIgnoreCase("clear sky")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.clear_sky);
-                } else if (description.equalsIgnoreCase("few clouds")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.few_clouds);
-                } else if (description.equalsIgnoreCase("scattered clouds")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.scattered_clouds);
-                } else if (description.equalsIgnoreCase("broken clouds")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.broken_clouds);
-                } else if (description.equalsIgnoreCase("shower rain")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.shower_rain);
-                } else if (description.equalsIgnoreCase("rain")) {
-                    mTempDescription.setText(description);
-                    mTempImage.setImageResource(R.drawable.rain);
-                } else if (description.equalsIgnoreCase("thunderstorm")) {
+                //GET WEATHER ID
+                int weatherId = weatherData.getWeather()[0].getId();
+                //SET WEATHER ICON
+                if (weatherId >= 200 && weatherId <= 299) {
                     mTempDescription.setText(description);
                     mTempImage.setImageResource(R.drawable.thunderstorm);
-                } else if (description.equalsIgnoreCase("snow")) {
+                } else if (weatherId >= 300 && weatherId <= 399) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.shower_rain);
+                } else if (weatherId >= 500 && weatherId <= 599) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.shower_rain);
+                } else if (weatherId >= 600 && weatherId <= 699) {
                     mTempDescription.setText(description);
                     mTempImage.setImageResource(R.drawable.snow);
-                } else if (description.equalsIgnoreCase("mist")) {
+                } else if (weatherId >= 700 && weatherId <= 799) {
                     mTempDescription.setText(description);
                     mTempImage.setImageResource(R.drawable.mist);
+                } else if (weatherId == 800) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.d_clear_sky);
+                } else if (weatherId == 801) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.d_few_clouds);
+                } else if (weatherId == 802) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.scattered_clouds);
+                } else if (weatherId == 803 || weatherId == 804) {
+                    mTempDescription.setText(description);
+                    mTempImage.setImageResource(R.drawable.broken_clouds);
                 }
 
                 //SET WIND VALUE
@@ -161,24 +166,23 @@ public class MainActivity extends AppCompatActivity {
                 mWindSpeed.setText(windValue);
 
                 //SET WIND DIRECTION
-
                 double degree = weatherData.getWind().getDegree();
-                if ((degree >= 337.6 && degree <= 360   ) || (degree >= 0 && degree <= 22.5)) {
-                    mWindDirection.setText("N ⇑");
+                if ((degree >= 337.6 && degree <= 360) || (degree >= 0 && degree <= 22.5)) {
+                    mWindDirection.setText(R.string.n);     //NORTH
                 } else if (degree > 22.6 && degree <= 67.5) {
-                    mWindDirection.setText("NE ⇗");
+                    mWindDirection.setText(R.string.ne);    //NORTH EAST
                 } else if (degree >= 67.6 && degree <= 112.5) {
-                    mWindDirection.setText("E ⇒");
+                    mWindDirection.setText(R.string.e);     //EAST
                 } else if (degree >= 112.6 && degree <= 157.5) {
-                    mWindDirection.setText("SE ⇘");
+                    mWindDirection.setText(R.string.se);    //SOUTH EAST
                 } else if (degree >= 157.6 && degree <= 202.5) {
-                    mWindDirection.setText("S ⇓");
+                    mWindDirection.setText(R.string.s);     //SOUTH
                 } else if (degree >= 202.6 && degree <= 247.5) {
-                    mWindDirection.setText("SW ⇙");
+                    mWindDirection.setText(R.string.sw);    //SOUTH WEST
                 } else if (degree >= 247.6 && degree <= 292.5) {
-                    mWindDirection.setText("W ⇐");
+                    mWindDirection.setText(R.string.w);     //WEST
                 } else if (degree > 292.6 && degree <= 337.5) {
-                    mWindDirection.setText("NW ⇖");
+                    mWindDirection.setText(R.string.nw);    //NORTH WEST
                 }
 
                 //SET HUMIDITY VALUE
@@ -191,19 +195,29 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            public double convertToCelcius(double temp) {
+            private double convertToCelcius(double temp) {
                 return temp - 273.15;
             }
 
-            public double convertToFahrenheit(double temp) {
-                return (((temp - 273) * 9/5) + 32);
+            private double convertToFahrenheit(double temp) {
+                return (((temp - 273) * 9 / 5) + 32);
             }
-
 
             @Override
             public void onFailure(Call<WeatherData> call, Throwable t) {
                 mTempDescription.setText(t.getMessage());
             }
         });
+    }
+
+    //ON WEATHER FORECAST BUTTON PRESSED
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.forecast_button) {
+
+            Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+            intent.putExtra("hour", hours);
+            startActivity(intent);
+        }
     }
 }
