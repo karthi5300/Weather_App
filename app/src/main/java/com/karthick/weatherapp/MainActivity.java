@@ -1,13 +1,16 @@
 package com.karthick.weatherapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
@@ -26,7 +29,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    String CITY_NAME = "Toronto";
+    private static final String KEY = "place";
+    private static final String TAG = "tag";
+
+    /*    USER INPUT
+     ***************
+     */
+    String CITY_NAME = "London";    //CITY NAME
+
     String APP_ID = "ebfcac32bda131ed5a160f2757938396";
     private static DecimalFormat df = new DecimalFormat("0");
     boolean isCelcius = true;
@@ -35,12 +45,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ConstraintLayout mRootLayout;
     private TextView mCityName, mTempValue, mTempDescription, mWindSpeed, mWindDirection, mPressure, mHumidity, mDate;
     private ImageView mTempImage;
-    private MaterialButton mForecastButton;
+    private ProgressBar progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MaterialButton mForecastButton;
 
         mCityName = findViewById(R.id.city_name);
         mTempValue = findViewById(R.id.temperature_value);
@@ -53,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWindDirection = findViewById(R.id.wind_direction_value);
         mPressure = findViewById(R.id.pressure_value);
         mForecastButton = findViewById(R.id.forecast_button);
+        progressBar = findViewById(R.id.progress_bar);
 
         mForecastButton.setOnClickListener(this);
 
@@ -68,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         call.enqueue(new Callback<WeatherData>() {
             private static final String TAG = "tag";
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
 
@@ -78,7 +93,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 WeatherData weatherData = response.body();
 
+                if (weatherData != null) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
                 //SET CITYNAME
+                assert weatherData != null;
                 if (weatherData.getName() != null) {
                     mCityName.setText(weatherData.getName());
                 }
@@ -91,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //SET BACKGROUND BASED ON TIME
                 DateFormat hourFormat = new SimpleDateFormat("HH");
                 int hour = Integer.parseInt(hourFormat.format(date));
-                Log.d(TAG, "Main: " + hour);
+                Log.d(TAG, "Main Hour: " + hour);
 
                 if (hour >= 7 && hour <= 10) {
                     mRootLayout.setBackgroundResource(R.drawable.morning);
@@ -114,16 +134,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mTempValue.setText(tempCValue);
 
                 //TO TOGGLE DISPLAY IN FAHRENHEIT
-                mTempValue.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (isCelcius) {
-                            mTempValue.setText(tempCValue);
-                            isCelcius = false;
-                        } else {
-                            mTempValue.setText(tempFValue);
-                            isCelcius = true;
-                        }
+                mTempValue.setOnClickListener(v -> {
+                    if (isCelcius) {
+                        mTempValue.setText(tempCValue);
+                        isCelcius = false;
+                    } else {
+                        mTempValue.setText(tempFValue);
+                        isCelcius = true;
                     }
                 });
 
@@ -162,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 //SET WIND VALUE
-                String windValue = String.valueOf(weatherData.getWind().getSpeed());
+                String windValue = weatherData.getWind().getSpeed() + "km/h";
                 mWindSpeed.setText(windValue);
 
                 //SET WIND DIRECTION
@@ -186,11 +203,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 //SET HUMIDITY VALUE
-                String humidityValue = String.valueOf(weatherData.getMain().getHumidity());
+                String humidityValue =weatherData.getMain().getHumidity() + "%";
                 mHumidity.setText(humidityValue);
 
                 //SET PRESSURE VALUE
-                String pressureValue = String.valueOf(weatherData.getMain().getPressure());
+                String pressureValue = weatherData.getMain().getPressure() + "hPa";
                 mPressure.setText(pressureValue);
             }
 
@@ -210,14 +227,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    //ON WEATHER FORECAST BUTTON PRESSED
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.forecast_button) {
 
-            Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
-            intent.putExtra("hour", hours);
-            startActivity(intent);
+        if ((v.getId()==R.id.forecast_button)) {
+            Intent forecastIntent = new Intent(MainActivity.this, ForecastActivity.class);
+            forecastIntent.putExtra("hour", hours);
+            startActivity(forecastIntent);
         }
     }
 }

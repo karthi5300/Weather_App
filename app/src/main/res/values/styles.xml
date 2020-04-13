@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/base</item>
         <item name="colorPrimaryDark">@color/base_dark</item>
@@ -10,9 +10,15 @@
 
     </style>
 
+
     <style name="NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>
 <!--        <item name="android:windowTranslucentNavigation">true</item>-->
+    </style>
+
+
+    <style name="ProgressBarStyle">
+        <item name="colorAccent">@color/base</item>
     </style>
 
 </resources>

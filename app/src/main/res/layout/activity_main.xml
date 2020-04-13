@@ -7,16 +7,27 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:theme="@style/ProgressBarStyle"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.38" />
+
     <TextView
         android:id="@+id/city_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="309dp"
+        android:layout_height="44dp"
         android:layout_marginTop="28dp"
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="35sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,10 +46,10 @@
 
     <ImageView
         android:id="@+id/temparature_image"
-        android:contentDescription="@string/temparature_desc"
         android:layout_width="96dp"
         android:layout_height="90dp"
         android:layout_marginTop="110dp"
+        android:contentDescription="@string/temparature_desc"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +94,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.3"
+            android:alpha="0.4"
             android:background="@drawable/layout_bg" />
 
         <TextView
@@ -102,27 +113,25 @@
 
         <TextView
             android:id="@+id/wind_speed_value"
-            android:layout_width="94dp"
+            android:layout_width="143dp"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="18dp"
             android:layout_marginTop="18dp"
-            android:layout_marginEnd="195dp"
+            android:layout_marginEnd="146dp"
             android:layout_toEndOf="@+id/wind"
             android:textColor="@color/white"
             android:textSize="22sp" />
 
         <TextView
             android:id="@+id/wind_direction_value"
-            android:layout_width="171dp"
+            android:layout_width="107dp"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="84dp"
             android:layout_marginTop="18dp"
-            android:layout_marginEnd="51dp"
-            android:layout_toEndOf="@+id/wind"
+            android:layout_marginEnd="22dp"
             android:textColor="@color/white"
             android:textSize="22sp" />
 
@@ -147,7 +156,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginStart="18dp"
             android:layout_marginTop="84dp"
-            android:layout_marginEnd="116dp"
+            android:layout_marginEnd="100dp"
             android:layout_marginBottom="84dp"
             android:layout_toEndOf="@+id/pressure"
             android:textColor="@color/white"
@@ -193,10 +202,9 @@
         app:cornerRadius="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/relative_layout"
-        app:layout_constraintVertical_bias="0.337" />
+        app:layout_constraintVertical_bias="0.382" />
 
     <TextView
         android:layout_width="wrap_content"
